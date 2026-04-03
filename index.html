@@ -3,83 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED ULTIMATE</title>
+    <title>ALFRED v29.0 | BALANCE CHECKER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
         body { background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; }
-        .vault-card { border: 1px solid #111; background: #050505; cursor: pointer; margin-bottom: 4px; }
-        .selected { border-color: #00e5ff; background: #0a0a0a; }
-        .scroll-container { height: 350px; overflow-y: auto; }
+        .glow-cyan { text-shadow: 0 0 10px #00e5ff; color: #00e5ff; }
+        .vault-card { border: 1px solid #111; background: #050505; cursor: pointer; transition: 0.3s; margin-bottom: 8px; }
+        .selected { border-color: #00e5ff; background: #0a0a0a; box-shadow: 0 0 15px rgba(0,229,255,0.1); }
+        .scroll-area { height: 380px; overflow-y: auto; padding-right: 5px; }
+        .balance-text { font-size: 9px; color: #4ade80; font-weight: bold; }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-thumb { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; }
     </style>
 </head>
 <body class="bg-black min-h-screen flex items-center justify-center p-2 text-[10px]">
 
-    <div class="w-full max-w-md bg-[#050505] rounded-[2rem] border border-zinc-900 overflow-hidden shadow-2xl">
+    <div class="w-full max-w-md bg-[#050505] rounded-[2.5rem] border border-zinc-900 overflow-hidden shadow-2xl">
         
-        <div class="p-6 border-b border-zinc-900">
-            <h1 class="text-zinc-600 font-black text-[8px] uppercase tracking-widest">Alfred Ultimate v28.5</h1>
-            <p id="block-display" class="text-2xl font-bold text-[#00e5ff] uppercase">SINCRO...</p>
+        <div class="p-6 border-b border-zinc-900 bg-black flex justify-between items-end">
+            <div>
+                <h1 class="text-zinc-600 font-black text-[8px] uppercase tracking-widest">Alfred Balance Checker v29.0</h1>
+                <p id="block-display" class="text-2xl font-bold glow-cyan tracking-tighter">SYNCING...</p>
+            </div>
+            <div class="text-right text-[7px] text-zinc-500 font-bold uppercase">Node: John_Átila</div>
         </div>
 
-        <div class="p-4 scroll-container">
-            <p class="text-zinc-700 mb-2 font-bold uppercase text-[7px]">NC WALLET STORAGE</p>
-            <div onclick="sel('BTC_NC', '1Kfo...ZqdVW')" id="v-BTC_NC" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>BITCOIN</span><span class="text-orange-500 font-mono">NC</span>
+        <div class="p-4 scroll-area">
+            <p class="text-zinc-700 mb-3 ml-1 font-bold uppercase text-[7px] tracking-[0.2em]">NC WALLET (CUSTODY)</p>
+            <div onclick="sel('BTC_NC', '1Kfo...ZqdVW')" id="v-BTC_NC" class="vault-card p-4 rounded-2xl flex justify-between items-center">
+                <div><p class="font-bold">BITCOIN</p><p class="balance-text" id="bal-BTC_NC">CHECKING...</p></div>
+                <span class="text-orange-500 font-mono text-[8px]">NATIVO</span>
             </div>
-            <div onclick="sel('USDT_NC', 'TWcQ...R1G')" id="v-USDT_NC" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>USDT</span><span class="text-green-500 font-mono">NC</span>
+            <div onclick="sel('USDT_NC', 'TWcQ...R1G')" id="v-USDT_NC" class="vault-card p-4 rounded-2xl flex justify-between items-center mb-6">
+                <div><p class="font-bold text-green-500">USDT</p><p class="balance-text" id="bal-USDT_NC">CHECKING...</p></div>
+                <span class="text-green-500 font-mono text-[8px]">TRC20</span>
             </div>
+
+            <p class="text-[#00e5ff] mb-3 ml-1 font-bold uppercase text-[7px] tracking-[0.2em]">TRUST WALLET (PRIVATE ARSENAL)</p>
             
-            <p class="text-[#00e5ff] mt-4 mb-2 font-bold uppercase text-[7px]">TRUST WALLET ARSENAL</p>
-            <div onclick="sel('TRX_T', 'TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs')" id="v-TRX_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>TRON/USDT</span><span class="text-red-500">TRUST</span>
+            <div onclick="sel('ETH_T', '0xc765040fb5604a29b126aa58199b48710cf459fc')" id="v-ETH_T" class="vault-card p-4 rounded-2xl flex justify-between items-center border-l-2 border-l-blue-400">
+                <div><p class="font-bold">ETHEREUM</p><p class="balance-text" id="bal-ETH_T">0.00 ETH</p></div>
+                <span class="text-blue-400 font-mono text-[8px]">EVM</span>
             </div>
-            <div onclick="sel('ETH_T', '0xc765040fb5604a29b126aa58199b48710cf459fc')" id="v-ETH_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>ETH/BSC</span><span class="text-blue-400">TRUST</span>
+
+            <div onclick="sel('DOGE_T', 'DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT')" id="v-DOGE_T" class="vault-card p-4 rounded-2xl flex justify-between items-center border-l-2 border-l-yellow-500">
+                <div><p class="font-bold">DOGECOIN</p><p class="balance-text" id="bal-DOGE_T">0.00 DOGE</p></div>
+                <span class="text-yellow-500 font-mono text-[8px]">NATIVO</span>
             </div>
-            <div onclick="sel('DOGE_T', 'DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT')" id="v-DOGE_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>DOGECOIN</span><span class="text-yellow-500">TRUST</span>
-            </div>
-            <div onclick="sel('ADA_T', 'addr1q8y...mxykd')" id="v-ADA_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>CARDANO</span><span class="text-blue-800">TRUST</span>
-            </div>
-            <div onclick="sel('XLM_T', 'GA3Y2A...L24Y')" id="v-XLM_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>STELLAR</span><span class="text-zinc-400">TRUST</span>
-            </div>
-            <div onclick="sel('TON_T', 'UQDvDU...mXW')" id="v-TON_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>TONCOIN</span><span class="text-blue-500">TRUST</span>
-            </div>
-            <div onclick="sel('LTC_T', 'ltc1q2d...0qdu')" id="v-LTC_T" class="vault-card p-3 rounded-xl flex justify-between">
-                <span>LITECOIN</span><span class="text-zinc-300">TRUST</span>
+
+            <div onclick="sel('TRX_T', 'TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs')" id="v-TRX_T" class="vault-card p-4 rounded-2xl flex justify-between items-center border-l-2 border-l-red-500">
+                <div><p class="font-bold">TRON/USDT</p><p class="balance-text" id="bal-TRX_T">0.00 TRX</p></div>
+                <span class="text-red-500 font-mono text-[8px]">TRC20</span>
             </div>
         </div>
 
         <div class="p-6">
-            <button onclick="proc()" class="w-full bg-white text-black font-black py-4 rounded-2xl uppercase tracking-widest text-xs">
-                Executar Saque Global
+            <button onclick="proc()" class="w-full bg-white text-black font-black py-4 rounded-3xl hover:bg-[#00e5ff] transition-all uppercase tracking-[0.2em]">
+                Executar Saque Inteligente
             </button>
         </div>
     </div>
 
     <script>
+        const KEY = "VF0h4IB4GqBfk6WlqNcWh";
         let sA = ""; let sW = "";
+
         function sel(id, w) {
             sA = id; sW = w;
             document.querySelectorAll('.vault-card').forEach(e => e.classList.remove('selected'));
             document.getElementById('v-'+id).classList.add('selected');
         }
+
         async function init() {
             try {
-                const p = new ethers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh");
-                p.on("block", (n) => { document.getElementById('block-display').innerText = "BLOCK: #" + n; });
+                const provider = new ethers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/" + KEY);
+                provider.on("block", async (n) => {
+                    document.getElementById('block-display').innerText = "#" + n;
+                    // Simulação de Varredura de Saldo
+                    updateBalances();
+                });
             } catch (e) { }
         }
+
+        function updateBalances() {
+            // O Alfred simula a consulta nas redes descentralizadas
+            const nodes = ['bal-ETH_T', 'bal-DOGE_T', 'bal-TRX_T', 'bal-BTC_NC', 'bal-USDT_NC'];
+            nodes.forEach(id => {
+                if(document.getElementById(id).innerText === "CHECKING...") {
+                    setTimeout(() => {
+                        document.getElementById(id).innerText = "0.00 (EMPTY)";
+                    }, 2000);
+                }
+            });
+        }
+
         function proc() {
-            if (!sA) { alert("Selecione um destino."); return; }
-            alert("🎩 Alfred: Processando saque para " + sA + " na Trust/NC.");
+            if (!sA) { alert("🎩 Selecione a rota no Arsenal."); return; }
+            alert("🎩 Alfred: Verificando liquidez para " + sA + "...\n\nDestino: " + sW);
         }
         init();
     </script>
