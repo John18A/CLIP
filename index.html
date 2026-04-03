@@ -3,105 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED v29.0 | BALANCE CHECKER</title>
+    <title>ALFRED | GLOBAL OVERLORD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; }
-        .glow-cyan { text-shadow: 0 0 10px #00e5ff; color: #00e5ff; }
-        .vault-card { border: 1px solid #111; background: #050505; cursor: pointer; transition: 0.3s; margin-bottom: 8px; }
-        .selected { border-color: #00e5ff; background: #0a0a0a; box-shadow: 0 0 15px rgba(0,229,255,0.1); }
-        .scroll-area { height: 380px; overflow-y: auto; padding-right: 5px; }
-        .balance-text { font-size: 9px; color: #4ade80; font-weight: bold; }
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-thumb { background: #1a1a1a; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;700&display=swap');
+        
+        body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; overflow: hidden; }
+        .neon-border { border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 0 20px rgba(0, 229, 255, 0.1); }
+        .glitch-text { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+        
+        /* Cartões de Elite */
+        .vault-card { 
+            background: linear-gradient(145deg, #080808, #020202);
+            border: 1px solid #111;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vault-card:hover { border-color: #00e5ff; transform: scale(1.02); }
+        .selected { 
+            border-color: #00e5ff; 
+            background: rgba(0, 229, 255, 0.05);
+            box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .scroll-v { scrollbar-width: none; -ms-overflow-style: none; }
+        .scroll-v::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-black min-h-screen flex items-center justify-center p-2 text-[10px]">
+<body class="p-4 flex items-center justify-center min-h-screen">
 
-    <div class="w-full max-w-md bg-[#050505] rounded-[2.5rem] border border-zinc-900 overflow-hidden shadow-2xl">
+    <div class="w-full max-w-lg neon-border bg-black rounded-lg overflow-hidden relative z-10">
         
-        <div class="p-6 border-b border-zinc-900 bg-black flex justify-between items-end">
-            <div>
-                <h1 class="text-zinc-600 font-black text-[8px] uppercase tracking-widest">Alfred Balance Checker v29.0</h1>
-                <p id="block-display" class="text-2xl font-bold glow-cyan tracking-tighter">SYNCING...</p>
+        <div class="p-6 border-b border-zinc-900 bg-[#050505]">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[9px] text-cyan-500 font-bold tracking-[4px] uppercase">Alfred Global System</span>
+                <span class="text-[9px] text-red-600 animate-pulse font-bold uppercase">● Live Network</span>
             </div>
-            <div class="text-right text-[7px] text-zinc-500 font-bold uppercase">Node: John_Átila</div>
+            <h1 id="block-display" class="glitch-text text-4xl font-black text-white italic">#00000000</h1>
+            <div class="flex gap-4 mt-2">
+                <span class="text-[8px] text-zinc-500 uppercase">Latency: <span id="ping" class="text-green-500">-- ms</span></span>
+                <span class="text-[8px] text-zinc-500 uppercase">Region: <span class="text-white">Global_Node</span></span>
+            </div>
         </div>
 
-        <div class="p-4 scroll-area">
-            <p class="text-zinc-700 mb-3 ml-1 font-bold uppercase text-[7px] tracking-[0.2em]">NC WALLET (CUSTODY)</p>
-            <div onclick="sel('BTC_NC', '1Kfo...ZqdVW')" id="v-BTC_NC" class="vault-card p-4 rounded-2xl flex justify-between items-center">
-                <div><p class="font-bold">BITCOIN</p><p class="balance-text" id="bal-BTC_NC">CHECKING...</p></div>
-                <span class="text-orange-500 font-mono text-[8px]">NATIVO</span>
-            </div>
-            <div onclick="sel('USDT_NC', 'TWcQ...R1G')" id="v-USDT_NC" class="vault-card p-4 rounded-2xl flex justify-between items-center mb-6">
-                <div><p class="font-bold text-green-500">USDT</p><p class="balance-text" id="bal-USDT_NC">CHECKING...</p></div>
-                <span class="text-green-500 font-mono text-[8px]">TRC20</span>
-            </div>
-
-            <p class="text-[#00e5ff] mb-3 ml-1 font-bold uppercase text-[7px] tracking-[0.2em]">TRUST WALLET (PRIVATE ARSENAL)</p>
+        <div class="p-4 space-y-4 h-[400px] overflow-y-auto scroll-v">
             
-            <div onclick="sel('ETH_T', '0xc765040fb5604a29b126aa58199b48710cf459fc')" id="v-ETH_T" class="vault-card p-4 rounded-2xl flex justify-between items-center border-l-2 border-l-blue-400">
-                <div><p class="font-bold">ETHEREUM</p><p class="balance-text" id="bal-ETH_T">0.00 ETH</p></div>
-                <span class="text-blue-400 font-mono text-[8px]">EVM</span>
-            </div>
+            <div class="grid grid-cols-1 gap-3" id="vault-grid">
+                </div>
 
-            <div onclick="sel('DOGE_T', 'DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT')" id="v-DOGE_T" class="vault-card p-4 rounded-2xl flex justify-between items-center border-l-2 border-l-yellow-500">
-                <div><p class="font-bold">DOGECOIN</p><p class="balance-text" id="bal-DOGE_T">0.00 DOGE</p></div>
-                <span class="text-yellow-500 font-mono text-[8px]">NATIVO</span>
-            </div>
-
-            <div onclick="sel('TRX_T', 'TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs')" id="v-TRX_T" class="vault-card p-4 rounded-2xl flex justify-between items-center border-l-2 border-l-red-500">
-                <div><p class="font-bold">TRON/USDT</p><p class="balance-text" id="bal-TRX_T">0.00 TRX</p></div>
-                <span class="text-red-500 font-mono text-[8px]">TRC20</span>
-            </div>
         </div>
 
-        <div class="p-6">
-            <button onclick="proc()" class="w-full bg-white text-black font-black py-4 rounded-3xl hover:bg-[#00e5ff] transition-all uppercase tracking-[0.2em]">
-                Executar Saque Inteligente
+        <div class="p-6 bg-[#050505] border-t border-zinc-900">
+            <button onclick="executeGlobal()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-sm glitch-text uppercase text-xs hover:bg-white transition-all shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                Execute Withdrawal Sequence
             </button>
         </div>
     </div>
 
     <script>
         const KEY = "VF0h4IB4GqBfk6WlqNcWh";
-        let sA = ""; let sW = "";
+        const RPC = `https://eth-mainnet.g.alchemy.com/v2/${KEY}`;
+        let selectedId = null;
 
-        function sel(id, w) {
-            sA = id; sW = w;
+        const VAULTS = [
+            { id: 'BTC', label: 'Bitcoin Native', net: 'BTC', addr: '1Kfo...ZqdVW', color: 'orange-500' },
+            { id: 'USDT_NC', label: 'Tether USD', net: 'TRC20', addr: 'TWcQ...R1G', color: 'green-500' },
+            { id: 'ETH_T', label: 'Ethereum', net: 'ERC20', addr: '0xc76...59fc', color: 'blue-400' },
+            { id: 'TRX_T', label: 'Tron / USDT', net: 'TRC20', addr: 'TV4p...oPs', color: 'red-500' },
+            { id: 'DOGE', label: 'Dogecoin', net: 'DOGE', addr: 'DRwh...rZHT', color: 'yellow-500' },
+            { id: 'TON', label: 'Toncoin', net: 'TON', addr: 'UQDv...mXW', color: 'blue-600' }
+        ];
+
+        function renderVaults() {
+            const grid = document.getElementById('vault-grid');
+            grid.innerHTML = VAULTS.map(v => `
+                <div onclick="selectV('${v.id}')" id="v-${v.id}" class="vault-card p-4 rounded-sm flex justify-between items-center relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 h-full w-1 bg-${v.color}"></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-white uppercase opacity-70">${v.label}</p>
+                        <p class="text-lg font-black text-white italic tracking-tighter" id="bal-${v.id}">---</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[8px] text-zinc-600 font-mono">${v.addr}</p>
+                        <p class="text-[9px] text-${v.color} font-black uppercase">${v.net}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectV(id) {
+            selectedId = id;
             document.querySelectorAll('.vault-card').forEach(e => e.classList.remove('selected'));
-            document.getElementById('v-'+id).classList.add('selected');
+            document.getElementById(`v-${id}`).classList.add('selected');
         }
 
         async function init() {
+            renderVaults();
+            const start = Date.now();
             try {
-                const provider = new ethers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/" + KEY);
-                provider.on("block", async (n) => {
+                const provider = new ethers.JsonRpcProvider(RPC);
+                provider.on("block", (n) => {
                     document.getElementById('block-display').innerText = "#" + n;
-                    // Simulação de Varredura de Saldo
-                    updateBalances();
+                    document.getElementById('ping').innerText = (Date.now() - start) + " ms";
+                    
+                    // Simula atualização de balanço global
+                    VAULTS.forEach(v => {
+                        const el = document.getElementById(`bal-${v.id}`);
+                        if(el.innerText === "---") {
+                            setTimeout(() => {
+                                el.innerText = (Math.random() * 0.0001).toFixed(6); // Valor aleatório de scan
+                                el.classList.add('text-green-400');
+                            }, Math.random() * 2000);
+                        }
+                    });
                 });
-            } catch (e) { }
+            } catch (e) {
+                document.getElementById('block-display').innerText = "ERROR_SYNC";
+            }
         }
 
-        function updateBalances() {
-            // O Alfred simula a consulta nas redes descentralizadas
-            const nodes = ['bal-ETH_T', 'bal-DOGE_T', 'bal-TRX_T', 'bal-BTC_NC', 'bal-USDT_NC'];
-            nodes.forEach(id => {
-                if(document.getElementById(id).innerText === "CHECKING...") {
-                    setTimeout(() => {
-                        document.getElementById(id).innerText = "0.00 (EMPTY)";
-                    }, 2000);
-                }
-            });
+        function executeGlobal() {
+            if(!selectedId) { alert("🎩 SYSTEM: ACCESS DENIED. SELECT VAULT."); return; }
+            alert(`🎩 ALFRED GLOBAL INITIATED\nTARGET: ${selectedId}\nSTATUS: BROADCASTING TO BLOCKCHAIN...`);
         }
 
-        function proc() {
-            if (!sA) { alert("🎩 Selecione a rota no Arsenal."); return; }
-            alert("🎩 Alfred: Verificando liquidez para " + sA + "...\n\nDestino: " + sW);
-        }
         init();
     </script>
 </body>
