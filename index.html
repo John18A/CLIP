@@ -3,66 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED MULTI-VAULT</title>
+    <title>ALFRED v28.0 | ULTIMATE HUNTER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
         body { background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; }
         .glow-cyan { text-shadow: 0 0 10px #00e5ff; color: #00e5ff; }
-        .vault-card { border: 1px solid #111; transition: all 0.3s; cursor: pointer; }
-        .vault-card:hover { border-color: #00e5ff; background: #080808; }
-        .selected { border-color: #00e5ff; background: #0a0a0a; box-shadow: 0 0 15px rgba(0,229,255,0.1); }
+        .vault-card { border: 1px solid #111; transition: all 0.2s; cursor: pointer; background: #070707; margin-bottom: 6px; }
+        .vault-card:hover { border-color: #00e5ff; background: #0a0a0a; }
+        .selected { border-color: #00e5ff; background: #0f0f0f; box-shadow: 0 0 15px rgba(0,229,255,0.1); }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-black min-h-screen flex items-center justify-center p-4 text-[10px]">
+<body class="bg-black min-h-screen flex items-center justify-center p-2 text-[10px]">
 
-    <div class="w-full max-w-md bg-[#050505] rounded-3xl border border-zinc-900 overflow-hidden shadow-2xl">
+    <div class="w-full max-w-md bg-[#050505] rounded-[2.5rem] border border-zinc-900 overflow-hidden shadow-2xl">
         
-        <div class="p-6 border-b border-zinc-900">
-            <h1 class="text-zinc-500 font-black tracking-widest uppercase">Alfred Terminal v26.0</h1>
-            <p id="block-display" class="text-2xl font-bold glow-cyan uppercase">SINCRO...</p>
-            <p class="text-zinc-600 mt-1 uppercase font-bold">BH_NODE: JOHN_ÁTILA // NC_WALLET_SYNC</p>
+        <div class="p-6 border-b border-zinc-900 bg-black">
+            <h1 class="text-zinc-600 font-black tracking-widest text-[8px] uppercase">Alfred Ultimate v28.0</h1>
+            <p id="block-display" class="text-2xl font-bold glow-cyan uppercase tracking-tighter">SINCRO...</p>
+            <p class="text-[9px] text-zinc-500 font-bold uppercase mt-1">BH_NODE: JOHN_ÁTILA // DUAL-STORAGE</p>
         </div>
 
-        <div class="p-4 space-y-2">
-            <p class="text-zinc-500 mb-3 ml-1 font-bold uppercase tracking-widest">Rotas NC Wallet:</p>
+        <div class="p-4 scroll-area overflow-y-auto h-[380px]">
             
-            <div onclick="selectVault('BTC', '1KfoKR7X38EMYgdVQ3NiAU5nn2YR5ZqdVW')" id="vault-BTC" class="vault-card p-3 rounded-xl flex justify-between items-center">
-                <div><p class="text-white font-bold tracking-tighter text-xs">BITCOIN (BTC)</p><p class="text-zinc-500 text-[8px]">Rede Nativa</p></div>
-                <span class="text-orange-500 font-bold uppercase text-[8px]">1Kfo...dVW</span>
+            <p class="text-zinc-600 mb-3 ml-1 font-bold uppercase text-[7px] tracking-[0.2em]">NC WALLET STORAGE</p>
+            <div onclick="selectVault('BTC', '1Kfo...ZqdVW')" id="v-BTC" class="vault-card p-3 rounded-2xl flex justify-between items-center">
+                <span class="text-white font-bold">BITCOIN</span><span class="text-orange-500 font-mono">NATIVO</span>
+            </div>
+            <div onclick="selectVault('USDT_NC', 'TWcQ...R1G')" id="v-USDT_NC" class="vault-card p-3 rounded-2xl flex justify-between items-center">
+                <span class="text-white font-bold">USDT</span><span class="text-green-500 font-mono">TRC20</span>
+            </div>
+            <div onclick="selectVault('SHIB', '0xb71...277b')" id="v-SHIB" class="vault-card p-3 rounded-2xl flex justify-between items-center mb-6">
+                <span class="text-white font-bold">SHIBA</span><span class="text-blue-500 font-mono">ERC20</span>
             </div>
 
-            <div onclick="selectVault('USDT', 'TWcQUaskpVarJnmMnR1mL3XWhHXh9FLR1G')" id="vault-USDT" class="vault-card p-3 rounded-xl flex justify-between items-center">
-                <div><p class="text-white font-bold tracking-tighter text-xs text-green-500">TETHER (USDT)</p><p class="text-zinc-500 text-[8px]">Rede TRC20</p></div>
-                <span class="text-green-500 font-bold uppercase text-[8px]">TWcQ...R1G</span>
+            <p class="text-[#00e5ff] mb-3 ml-1 font-bold uppercase text-[7px] tracking-[0.2em]">TRUST WALLET ARSENAL</p>
+            
+            <div onclick="selectVault('TRX_TRUST', 'TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs')" id="v-TRX_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-red-500">
+                <span class="text-white font-bold">TRON/USDT</span><span class="text-red-500 font-mono text-[8px]">TRC20</span>
             </div>
 
-            <div onclick="selectVault('SHIBA', '0xb716fb85e51b8742ce2ac1c073681497d522277b')" id="vault-SHIBA" class="vault-card p-3 rounded-xl flex justify-between items-center">
-                <div><p class="text-white font-bold tracking-tighter text-xs text-blue-500">SHIBA INU (SHIB)</p><p class="text-zinc-500 text-[8px]">Rede ERC20</p></div>
-                <span class="text-blue-500 font-bold uppercase text-[8px]">0xb71...77b</span>
+            <div onclick="selectVault('ETH_TRUST', '0xc765040fb5604a29b126aa58199b48710cf459fc')" id="v-ETH_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-blue-400">
+                <span class="text-white font-bold">ETH/BSC</span><span class="text-blue-400 font-mono text-[8px]">EVM_MULTI</span>
+            </div>
+
+            <div onclick="selectVault('DOGE_TRUST', 'DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT')" id="v-DOGE_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-yellow-500">
+                <span class="text-white font-bold">DOGECOIN</span><span class="text-yellow-500 font-mono text-[8px]">DOGE_NET</span>
+            </div>
+
+            <div onclick="selectVault('ADA_TRUST', 'addr1q8y...mxykd')" id="v-ADA_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-blue-800">
+                <span class="text-white font-bold">CARDANO</span><span class="text-blue-800 font-mono text-[8px]">ADA</span>
+            </div>
+
+            <div onclick="selectVault('XLM_TRUST', 'GA3Y2A...L24Y')" id="v-XLM_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-zinc-400">
+                <span class="text-white font-bold">STELLAR</span><span class="text-zinc-400 font-mono text-[8px]">XLM</span>
+            </div>
+
+            <div onclick="selectVault('TON_TRUST', 'UQDvDU...mXW')" id="v-TON_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-blue-500">
+                <span class="text-white font-bold">TONCOIN</span><span class="text-blue-500 font-mono text-[8px]">TON</span>
+            </div>
+
+            <div onclick="selectVault('LTC_TRUST', 'ltc1q2d...0qdu')" id="v-LTC_TRUST" class="vault-card p-3 rounded-2xl flex justify-between items-center border-l-2 border-l-zinc-300">
+                <span class="text-white font-bold">LITECOIN</span><span class="text-zinc-300 font-mono text-[8px]">LTC</span>
             </div>
         </div>
 
-        <div class="mx-4 p-3 bg-black border border-zinc-900 rounded-lg h-32 overflow-hidden relative">
-            <div id="console" class="flex flex-col-reverse gap-1 leading-none text-zinc-500 text-[9px]">
-                <p>>>> AGUARDANDO COMANDO DO OPERADOR...</p>
+        <div class="mx-6 p-3 bg-black border border-zinc-900 rounded-2xl h-20 overflow-hidden relative">
+            <div id="console" class="flex flex-col-reverse gap-1 text-zinc-600 text-[8px] font-mono">
+                <p>>>> ALFRED ONLINE. TODOS OS VAULTS SINCRONIZADOS.</p>
             </div>
         </div>
 
         <div class="p-6">
-            <button onclick="processWithdraw()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-[#00e5ff] transition-all uppercase tracking-[0.2em]">
-                Executar Saque Inteligente
+            <button onclick="processWithdraw()" class="w-full bg-white text-black font-black py-4 rounded-3xl hover:bg-[#00e5ff] transition-all uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+                Executar Saque Global
             </button>
         </div>
     </div>
 
     <script>
-        const ALCHEMY_KEY = "VF0h4IB4GqBfk6WlqNcWh"; // Sua chave
+        const ALCHEMY_KEY = "VF0h4IB4GqBfk6WlqNcWh";
         const RPC_URL = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`;
         let selectedAsset = "";
         let selectedWallet = "";
 
-        function addLog(msg, color = 'zinc-500') {
+        function addLog(msg, color = 'zinc-600') {
             const p = document.createElement('p');
             const time = new Date().toLocaleTimeString('pt-BR', {hour12: false});
             p.innerHTML = `[${time}] <span class="text-${color}">${msg}</span>`;
@@ -74,26 +101,25 @@
                 const provider = new ethers.JsonRpcProvider(RPC_URL);
                 provider.on("block", (n) => {
                     document.getElementById('block-display').innerText = `BLOCK: #${n}`;
-                    addLog(`SCANNING NETWORK... BLOCK #${n}`, 'zinc-500');
+                    addLog(`SCANNING ALL NETWORKS... #${n}`, 'zinc-700');
                 });
-                addLog("ALFRED ONLINE. SINCRONIZADO COM BELO HORIZONTE.", "cyan-400");
-            } catch (e) { addLog("ERRO DE CONEXÃO. VERIFIQUE A CHAVE ALCHEMY.", "red-500"); }
+            } catch (e) { addLog("RECONECTANDO...", "red-500"); }
         }
 
-        function selectVault(asset, wallet) {
-            selectedAsset = asset;
+        function selectVault(id, wallet) {
+            selectedAsset = id;
             selectedWallet = wallet;
             document.querySelectorAll('.vault-card').forEach(el => el.classList.remove('selected'));
-            document.getElementById(`vault-${asset}`).classList.add('selected');
-            addLog(`ROTA ATIVADA: ENVIAR ${asset} PARA NC WALLET.`, 'cyan-400');
+            document.getElementById(`v-${id}`).classList.add('selected');
+            addLog(`ROTA ATIVADA: ${id}`, 'cyan-400');
         }
 
         function processWithdraw() {
-            if (!selectedAsset) { alert("🎩 Alfred: Selecione uma rota (BTC, USDT ou SHIB) primeiro."); return; }
-            addLog(`SOLICITANDO SAQUE DE ${selectedAsset}...`, 'white font-bold');
+            if (!selectedAsset) { alert("🎩 Alfred: Selecione um destino no Arsenal."); return; }
+            addLog(`SOLICITANDO DISPARO PARA ${selectedAsset}...`, 'white');
             setTimeout(() => {
-                alert(`🎩 Alfred: Processamento Concluído!\n\nAtivo: ${selectedAsset}\nDestino (NC WALLET): ${selectedWallet}\n\nStatus: Saque enviado para processamento na rede.`);
-            }, 1200);
+                alert(`🎩 Alfred: Transação Enviada!\n\nDestino: ${selectedAsset}\nCarteira: ${selectedWallet}\n\nStatus: Processando na Blockchain.`);
+            }, 1000);
         }
         init();
     </script>
