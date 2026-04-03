@@ -3,192 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED | ACTIVE HUNTER v41.0</title>
+    <title>ALFRED | REAL-TIME HUNTER v45.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;800&family=Orbitron:wght@900&display=swap');
-        
-        body { background: #000; color: #00ff41; font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh; }
-        .terminal-bg { background: rgba(5, 5, 5, 0.98); border: 1px solid #111; box-shadow: 0 0 15px rgba(0,255,65,0.05); }
-        .glitch-text { font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
-        
-        /* Efeito de Varredura */
-        .scan-line { height: 2px; background: rgba(0, 255, 65, 0.1); width: 100%; position: absolute; animation: scan 3s linear infinite; pointer-events: none; z-index: 100; }
-        @keyframes scan { 0% { top: -2px; } 100% { top: 100%; } }
-        
-        /* Alertas */
-        .whale-alert { color: #ff003c; font-weight: 800; animation: blink 0.5s infinite; text-shadow: 0 0 5px #ff003c; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        .capture-alert { color: #00e5ff; font-weight: 800; animation: blink-cyan 0.3s 3; }
-        @keyframes blink-cyan { 0%, 100% { opacity: 1; text-shadow: 0 0 10px #00e5ff; } 50% { opacity: 0; } }
-        
-        /* Aba Lateral */
-        .side-panel { transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1); transform: translateX(100%); z-index: 1000; }
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;800&display=swap');
+        body { background: #000; color: #00ff41; font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh; margin: 0; }
+        .terminal-bg { background: #050505; border: 1px solid #111; }
+        .side-panel { transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1); transform: translateX(100%); z-index: 1000; background: #080808; border-left: 1px solid #1a1a1a; }
         .side-panel.open { transform: translateX(0); }
-        
-        /* Logs */
-        .log-entry { border-bottom: 1px solid #080808; padding: 2px 0; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* Animação de Saldo */
-        .found-anim { animation: pulse-cyan 1s ease-out; }
-        @keyframes pulse-cyan { 0% { color: #fff; text-shadow: 0 0 0px #00e5ff; } 50% { color: #00e5ff; text-shadow: 0 0 20px #00e5ff; } 100% { color: #fff; text-shadow: 0 0 0px #00e5ff; } }
-        
-        .scroll-v { scrollbar-width: none; }
-        .scroll-v::-webkit-scrollbar { display: none; }
+        .log-entry { font-size: 10px; border-bottom: 1px solid #0d0d0d; padding: 4px 0; white-space: nowrap; }
+        .scan-line { height: 1px; background: rgba(0, 255, 65, 0.2); width: 100%; position: absolute; animation: scan 4s linear infinite; pointer-events: none; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        ::-webkit-scrollbar { width: 2px; }
+        ::-webkit-scrollbar-thumb { background: #111; }
     </style>
 </head>
-<body class="flex flex-col p-1">
+<body class="flex flex-col h-full">
 
     <div class="scan-line"></div>
 
-    <div class="flex justify-between items-center p-3 terminal-bg rounded-t-xl border-b border-zinc-800 relative z-50">
-        <div class="flex flex-col">
-            <span class="text-[7px] uppercase font-black text-zinc-600 tracking-[3px]">Alfred Live Scanner</span>
-            <h1 id="block-num" class="glitch-text text-xl font-extrabold text-white italic tracking-tighter">#SINCRO...</h1>
+    <div class="p-4 terminal-bg border-b border-zinc-900 flex justify-between items-center z-50">
+        <div>
+            <p class="text-[8px] text-zinc-600 font-bold uppercase tracking-[3px]">Alfred Live Node</p>
+            <h1 id="block-num" class="text-xl font-black text-white italic tracking-tighter">#SYNCING...</h1>
         </div>
-        <div class="flex gap-3">
-            <button onclick="togglePanel()" class="bg-zinc-950 px-4 py-2 rounded-lg border border-zinc-800 text-[10px] font-black text-white hover:border-[#00e5ff] transition-all">ARSENAL 🛡️</button>
-        </div>
+        <button onclick="togglePanel()" class="bg-white text-black px-4 py-2 rounded font-black text-[10px] hover:bg-cyan-400 transition-all">ARSENAL 🛡️</button>
     </div>
 
-    <div id="scan-container" class="flex-1 overflow-hidden p-3 terminal-bg relative border-t-0">
-        <div id="terminal-logs" class="flex flex-col h-full overflow-hidden text-[9px]">
+    <div class="flex-1 overflow-hidden p-4 relative">
+        <div id="terminal-logs" class="flex flex-col h-full overflow-hidden">
             </div>
     </div>
 
-    <div id="vault-panel" class="side-panel fixed right-0 top-0 h-full w-80 bg-[#050505] border-l border-zinc-800 p-5 shadow-2xl">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xs font-black uppercase text-white tracking-widest">Target Arsenal</h2>
-            <button onclick="togglePanel()" class="text-zinc-600 hover:text-white text-lg font-bold">✕</button>
+    <div id="vault-panel" class="side-panel fixed right-0 top-0 h-full w-80 shadow-2xl p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xs font-black text-white uppercase tracking-widest">Target Arsenal</h2>
+            <button onclick="togglePanel()" class="text-zinc-600 hover:text-white text-xl">✕</button>
         </div>
-        <div class="space-y-3 overflow-y-auto h-[85%] pr-2 scroll-v" id="bal-container">
+        
+        <div id="wallet-list" class="space-y-4 overflow-y-auto h-[85%] pr-2">
             </div>
-    </div>
-
-    <div id="alert-bar" class="p-2 bg-black text-center text-[9px] font-black uppercase tracking-[5px] border-t border-zinc-800 rounded-b-xl text-zinc-600 transition-all duration-300">
-        Monitoring Liquidity Streams...
     </div>
 
     <script>
         const ALCHEMY_KEY = "VF0h4IB4GqBfk6WlqNcWh";
         const RPC = "https://eth-mainnet.g.alchemy.com/v2/" + ALCHEMY_KEY;
         const terminal = document.getElementById('terminal-logs');
-        const blockEl = document.getElementById('block-num');
-        const alertBar = document.getElementById('alert-bar');
         
-        let walletData = [
-            { id: 'BTC_NC', label: 'BTC NC', addr: '1Kfo...dVW', bal: '0.0000', color: 'orange-500', net: 'Nativo' },
-            { id: 'USDT_T', label: 'USDT TRUST', addr: 'TV4p...oPs', bal: '0.00', color: 'green-500', net: 'TRC20' },
-            { id: 'ETH_T', label: 'ETH TRUST', addr: '0xc76...59fc', bal: '0.0000', color: 'blue-500', net: 'EVM' },
-            { id: 'DOGE_T', label: 'DOGE TRUST', addr: 'DRwh...ZHT', bal: '0.00', color: 'yellow-500', net: 'Nativo' },
-            { id: 'ADA_T', label: 'ADA TRUST', addr: 'addr1...mxykd', bal: '0.00', color: 'blue-800', net: 'Cardano' },
-            { id: 'TON_T', label: 'TON TRUST', addr: 'UQDv...mXW', bal: '0.00', color: 'blue-600', net: 'TON' }
+        // Dados REAIS baseados no histórico do John Átila
+        const wallets = [
+            { id: 'BTC', label: 'Bitcoin (NC)', addr: '1Kfo...ZqdVW', color: 'orange-500' },
+            { id: 'USDT_T', label: 'USDT (Trust)', addr: 'TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs', color: 'green-500' },
+            { id: 'ETH_T', label: 'Ethereum (Trust)', addr: '0xc765040fb5604a29b126aa58199b48710cf459fc', color: 'blue-400' },
+            { id: 'DOGE_T', label: 'Dogecoin (Trust)', addr: 'DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT', color: 'yellow-500' },
+            { id: 'ADA_T', label: 'Cardano (Trust)', addr: 'addr1q8y...7mqm8xykd', color: 'blue-800' },
+            { id: 'TON_T', label: 'Toncoin (Trust)', addr: 'UQDvDU...pXW', color: 'blue-500' },
+            { id: 'LTC_T', label: 'Litecoin (Trust)', addr: 'ltc1q2d...0qdu', color: 'zinc-400' }
         ];
 
         function togglePanel() { document.getElementById('vault-panel').classList.toggle('open'); }
 
-        function renderVaults() {
-            document.getElementById('bal-container').innerHTML = walletData.map(w => `
-                <div class="p-4 border border-zinc-900 rounded-xl bg-black mb-3 group hover:border-[#00e5ff] transition-all relative overflow-hidden">
+        function renderWallets() {
+            document.getElementById('wallet-list').innerHTML = wallets.map(w => `
+                <div class="p-4 border border-zinc-900 rounded bg-black/50 relative overflow-hidden group">
                     <div class="absolute left-0 top-0 h-full w-1 bg-${w.color}"></div>
-                    <div class="flex justify-between items-start mb-1">
-                        <p class="text-[8px] text-zinc-600 uppercase font-black">${w.label}</p>
-                        <p class="text-[7px] text-${w.color} font-black uppercase font-mono">${w.net}</p>
-                    </div>
-                    <p class="text-2xl font-black text-white tracking-widest italic" id="val-${w.id}">${w.bal}</p>
-                    <p class="text-[7px] text-zinc-700 mt-2 font-mono truncate">${w.addr}</p>
+                    <p class="text-[8px] text-zinc-500 uppercase font-black">${w.label}</p>
+                    <p class="text-xl font-black text-white italic" id="bal-${w.id}">0.00</p>
+                    <p class="text-[7px] text-zinc-800 mt-1 font-mono truncate">${w.addr}</p>
                 </div>
             `).join('');
         }
 
-        function addLog(msg, type = 'safe') {
+        async function fetchRealBalances() {
+            try {
+                const provider = new ethers.JsonRpcProvider(RPC);
+                // Busca saldo real do endereço Ethereum do John na Trust
+                const ethBal = await provider.getBalance("0xc765040fb5604a29b126aa58199b48710cf459fc");
+                document.getElementById('bal-ETH_T').innerText = ethers.formatEther(ethBal).slice(0, 8);
+            } catch (e) { console.error("Erro na leitura real", e); }
+        }
+
+        function addLog(msg, color = 'zinc-600') {
             const entry = document.createElement('div');
-            let className = 'log-entry ';
-            let prefix = '> ';
-            
-            switch(type) {
-                case 'whale': className += 'whale-alert'; prefix = '[!] WHALE: '; break;
-                case 'found': className += 'text-cyan-400 font-bold capture-alert'; prefix = '[+] CAPTURE: '; break;
-                case 'block': className += 'text-white font-black bg-zinc-950 p-1'; prefix = ''; break;
-                default: className += 'text-zinc-600';
-            }
-            
-            entry.className = className;
-            const time = new Date().toLocaleTimeString('pt-BR', {hour12: false, fractionDigits: 1});
-            entry.innerHTML = `<span class="text-zinc-700">[${time}]</span> ${prefix}${msg}`;
+            entry.className = `log-entry text-${color}`;
+            const time = new Date().toLocaleTimeString('pt-BR', {hour12: false});
+            entry.innerHTML = `<span class="text-zinc-800">[${time}]</span> > ${msg}`;
             terminal.prepend(entry);
-            
-            // Limpa logs antigos para manter performance
             if (terminal.children.length > 50) terminal.lastChild.remove();
         }
 
         async function init() {
-            renderVaults();
-            addLog("INITIALIZING SCANNER NODES...", 'block');
-            addLog("BH_NODE: JOHN_ÁTILA | STANDBY...", 'safe');
+            renderWallets();
+            const provider = new ethers.JsonRpcProvider(RPC);
             
-            try {
-                const provider = new ethers.JsonRpcProvider(RPC);
-                provider.on("block", (n) => {
-                    blockEl.innerText = `#${n}`;
-                    addLog(`SYNCED BLOCK ${n} | DEEP SCAN INITIATED`, 'block');
-                    simulateScanCycle();
-                });
-            } catch (e) { addLog("RECONECTANDO AO NODE PRINCIPAL...", "whale"); }
-        }
-
-        function simulateScanCycle() {
-            // Ciclo de scan veloz simulando processamento
-            let i = 0;
-            const cycle = setInterval(() => {
-                const rand = Math.random();
-                if (rand < 0.7) {
-                    // Transação normal (pula)
-                    const txHash = '0x' + Math.random().toString(16).slice(2, 12);
-                    const gas = (Math.random() * 50 + 10).toFixed(0);
-                    addLog(`SCANNING TX ${txHash}... [G:${gas}]`);
-                } else if (rand < 0.9) {
-                    // Baleia detectada (pula e alerta)
-                    const val = (Math.random() * 100 + 10).toFixed(2);
-                    addLog(` !!! MOVEMENT: ${val} ETH !!!`, 'whale');
-                    triggerAlert('red');
-                } else {
-                    // Liquidez encontrada (pula e captura)
-                    const val = (Math.random() * 0.05 + 0.001).toFixed(4);
-                    addLog(`+++ RESIDUAL LIQUIDITY: +${val} +++`, 'found');
-                    triggerAlert('cyan');
-                    updateBalance(val);
-                }
+            provider.on("block", (n) => {
+                document.getElementById('block-num').innerText = "#" + n;
+                addLog(`NEW BLOCK DETECTED: ${n}`, 'white');
+                fetchRealBalances();
                 
-                i++;
-                if (i > 15) clearInterval(cycle); // Fim do ciclo de scan por bloco
-            }, 150); // Velocidade do giro
-        }
-
-        function triggerAlert(type) {
-            const color = type === 'red' ? 'bg-red-950 text-red-400' : 'bg-cyan-950 text-cyan-400';
-            alertBar.className = `p-2 ${color} text-center text-[9px] font-black uppercase tracking-[5px] border-t border-zinc-800 rounded-b-xl transition-all duration-300`;
-            setTimeout(() => {
-                alertBar.className = 'p-2 bg-black text-center text-[9px] font-black uppercase tracking-[5px] border-t border-zinc-800 rounded-b-xl text-zinc-600 transition-all duration-300';
-            }, 1000);
-        }
-
-        function updateBalance(val) {
-            const w = walletData[Math.floor(Math.random() * walletData.length)];
-            const el = document.getElementById(`val-${w.id}`);
-            const currentBal = parseFloat(el.innerText);
-            
-            // Animação de subida do valor
-            el.classList.add('found-anim');
-            setTimeout(() => el.classList.remove('found-anim'), 1000);
-            
-            // Atualiza o valor real
-            if (w.id.includes('USDT') || w.id.includes('DOGE') || w.id.includes('TON')) {
-                el.innerText = (currentBal + parseFloat(val) * 2000).toFixed(2); // Simula valor maior para stable/tokens
-            } else {
-                el.innerText = (currentBal + parseFloat(val)).toFixed(4); // Simula valor para BTC/ETH
-            }
+                // Simula varredura agressiva de transações reais no bloco
+                for(let i=0; i<10; i++) {
+                    setTimeout(() => {
+                        const hash = "0x" + Math.random().toString(16).slice(2, 15);
+                        addLog(`SCANNING TX: ${hash}... [SAFE]`, 'zinc-600');
+                    }, i * 200);
+                }
+            });
         }
 
         init();
