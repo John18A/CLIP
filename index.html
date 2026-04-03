@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED | AUTONOMOUS EXECUTION v70.0</title>
+    <title>ALFRED | BRUTE FORCE HUNTER v80.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
@@ -12,9 +12,9 @@
         .terminal-bg { background: #050505; border: 1px solid #111; }
         .side-panel { transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1); transform: translateX(100%); z-index: 1000; background: #080808; border-left: 1px solid #1a1a1a; }
         .side-panel.open { transform: translateX(0); }
-        .log-entry { font-size: 10px; border-bottom: 1px solid #0d0d0d; padding: 4px 0; }
-        .executing { color: #fff; background: #991b1b; animation: pulse 0.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } }
+        .log-entry { font-size: 9px; border-bottom: 1px solid #0d0d0d; padding: 2px 0; white-space: nowrap; }
+        .found-alert { color: #fff; background: #166534; font-weight: bold; animation: flash 0.2s infinite; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body class="flex flex-col h-full">
@@ -22,25 +22,25 @@
     <div class="p-4 terminal-bg border-b border-zinc-900 flex justify-between items-center z-50">
         <div>
             <div class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <p class="text-[8px] text-zinc-500 font-bold uppercase tracking-[3px]">Alfred Autonomous System</p>
+                <span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                <p class="text-[8px] text-zinc-500 font-bold uppercase tracking-[3px]">Brute Force Engine Active</p>
             </div>
-            <h1 id="block-num" class="text-xl font-black text-white italic tracking-tighter">#CONNECTING...</h1>
+            <h1 id="scan-stat" class="text-xl font-black text-white italic tracking-tighter italic">SCANNING NETWORK...</h1>
         </div>
-        <button onclick="togglePanel()" class="bg-white text-black px-4 py-2 rounded font-black text-[10px] uppercase">Arsenal 🛡️</button>
+        <button onclick="togglePanel()" class="bg-zinc-900 text-white border border-zinc-800 px-4 py-2 rounded font-black text-[10px]">ARSENAL 🛡️</button>
     </div>
 
-    <div class="flex-1 overflow-hidden p-4 relative">
+    <div class="flex-1 overflow-hidden p-2 relative">
         <div id="terminal-logs" class="flex flex-col h-full overflow-hidden">
             </div>
     </div>
 
-    <div id="vault-panel" class="side-panel fixed right-0 top-0 h-full w-80 p-6">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xs font-black text-white uppercase italic">Active Vaults</h2>
+    <div id="vault-panel" class="side-panel fixed right-0 top-0 h-full w-80 p-6 shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xs font-black text-white uppercase italic tracking-widest">My Arsenal (Safe)</h2>
             <button onclick="togglePanel()" class="text-zinc-600 text-xl">✕</button>
         </div>
-        <div id="wallet-list" class="space-y-4 overflow-y-auto h-[80%] pr-2">
+        <div id="wallet-list" class="space-y-3 overflow-y-auto h-[85%] pr-2">
             </div>
     </div>
 
@@ -49,81 +49,63 @@
         const RPC = "https://eth-mainnet.g.alchemy.com/v2/" + ALCHEMY_KEY;
         const terminal = document.getElementById('terminal-logs');
         
-        // Suas Carteiras Reais (Trust, NC, Base)
-        const wallets = [
-            { id: 'BTC', label: 'BTC (NC)', addr: '1Kfo...ZqdVW', color: 'orange-500' },
-            { id: 'ETH_T', label: 'ETH (Trust/Base)', addr: '0xc765040fb5604a29b126aa58199b48710cf459fc', color: 'blue-400' },
-            { id: 'USDT_T', label: 'USDT (Trust)', addr: 'TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs', color: 'green-500' },
-            { id: 'DOGE_T', label: 'DOGE (Trust)', addr: 'DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT', color: 'yellow-500' },
-            { id: 'ADA_T', label: 'ADA (Trust)', addr: 'addr1q8...mxykd', color: 'blue-700' },
-            { id: 'TON_T', label: 'TON (Trust)', addr: 'UQDvDU...pXW', color: 'blue-500' }
+        const myWallets = [
+            { id: 'BTC', label: 'BTC (NC)', addr: '1Kfo...ZqdVW', bal: 0, color: 'orange-500' },
+            { id: 'ETH', label: 'ETH (Trust)', addr: '0xc76...59fc', bal: 0, color: 'blue-400' },
+            { id: 'USDT', label: 'USDT (Trust)', addr: 'TV4p...oPs', bal: 0, color: 'green-500' }
         ];
 
         function togglePanel() { document.getElementById('vault-panel').classList.toggle('open'); }
 
-        function renderWallets() {
-            document.getElementById('wallet-list').innerHTML = wallets.map(w => `
-                <div class="p-4 border border-zinc-900 rounded bg-black relative">
+        function renderArsenal() {
+            document.getElementById('wallet-list').innerHTML = myWallets.map(w => `
+                <div class="p-3 border border-zinc-900 rounded bg-black/60 relative">
                     <div class="absolute left-0 top-0 h-full w-1 bg-${w.color}"></div>
-                    <p class="text-[8px] text-zinc-600 uppercase font-black">${w.label}</p>
-                    <p class="text-xl font-black text-white italic" id="bal-${w.id}">0.00</p>
-                    <p class="text-[7px] text-zinc-800 mt-1 font-mono truncate">${w.addr}</p>
+                    <p class="text-[7px] text-zinc-600 uppercase font-bold">${w.label}</p>
+                    <p class="text-lg font-black text-white italic" id="my-bal-${w.id}">${w.bal.toFixed(4)}</p>
+                    <p class="text-[6px] text-zinc-800 truncate">${w.addr}</p>
                 </div>
             `).join('');
         }
 
-        async function monitorRealAssets() {
-            try {
-                const provider = new ethers.JsonRpcProvider(RPC);
-                // Consulta real do seu saldo ETH na Trust
-                const balance = await provider.getBalance("0xc765040fb5604a29b126aa58199b48710cf459fc");
-                const ethVal = parseFloat(ethers.formatEther(balance));
-                document.getElementById('bal-ETH_T').innerText = ethVal.toFixed(6);
-
-                // GATILHO DE SAQUE AUTOMÁTICO (REAL)
-                if (ethVal > 0) {
-                    executeAutoWithdraw("ETH", ethVal, "0xc765040fb5604a29b126aa58199b48710cf459fc");
-                }
-            } catch (e) { addLog("NODE SYNC ERROR", "text-red-500"); }
-        }
-
-        function executeAutoWithdraw(asset, amount, from) {
-            addLog(`!!! LIQUIDITY DETECTED: ${amount} ${asset} !!!`, 'executing p-1 px-2');
-            addLog(`CALCULATING GAS FEES... [OK]`, 'text-white');
-            addLog(`ATTEMPTING BROADCAST TO ARSENAL...`, 'text-yellow-500');
-            
-            // Aqui o Alfred enviaria o comando de saque real
-            // Nota: Requer assinatura de transação (Private Key)
-            setTimeout(() => {
-                addLog(`TRANSACTION PENDING ON BLOCKCHAIN...`, 'text-blue-400');
-            }, 1500);
-        }
-
-        function addLog(msg, classes = 'text-zinc-600') {
+        function addLog(msg, type = 'normal') {
             const entry = document.createElement('div');
-            entry.className = `log-entry ${classes}`;
+            entry.className = `log-entry ${type === 'found' ? 'found-alert' : 'text-zinc-600'}`;
             const time = new Date().toLocaleTimeString('pt-BR', {hour12: false});
-            entry.innerHTML = `<span>[${time}]</span> > ${msg}`;
+            entry.innerHTML = `[${time}] ${msg}`;
             terminal.prepend(entry);
-            if (terminal.children.length > 50) terminal.lastChild.remove();
+            if (terminal.children.length > 80) terminal.lastChild.remove();
         }
 
-        async function init() {
-            renderWallets();
-            const provider = new ethers.JsonRpcProvider(RPC);
-            provider.on("block", (n) => {
-                document.getElementById('block-num').innerText = "#" + n;
-                addLog(`NEW BLOCK: ${n} | SCANNING...`, 'text-zinc-400 font-bold');
-                monitorRealAssets();
+        // Simulação de alta velocidade de Brute Force
+        function startHunting() {
+            setInterval(() => {
+                const randomAddr = "0x" + Math.random().toString(16).slice(2, 12) + "..." + Math.random().toString(16).slice(2, 6);
+                const chance = Math.random();
                 
-                // Simulação de varredura de transações do bloco
-                for(let i=0; i<8; i++) {
-                    setTimeout(() => {
-                        const hash = "0x" + Math.random().toString(16).slice(2, 12);
-                        addLog(`CHECKING ADDR: ${hash}... [0.00]`);
-                    }, i * 200);
+                if (chance > 0.99) {
+                    // ACHOU ALGO!
+                    const amount = (Math.random() * 0.05).toFixed(4);
+                    addLog(`!!! [FOUND] ADDR: ${randomAddr} | BALANCE: ${amount} ETH !!!`, 'found');
+                    autoTransfer(amount);
+                } else {
+                    addLog(`CHECKING: ${randomAddr} [EMPTY]`);
                 }
-            });
+            }, 100); // Velocidade de 10 checagens por segundo
+        }
+
+        function autoTransfer(amount) {
+            addLog(`>> INITIATING AUTO-TRANSFER TO ARSENAL...`, 'found');
+            setTimeout(() => {
+                myWallets[1].bal += parseFloat(amount); // Adiciona ao ETH (Trust)
+                renderArsenal();
+                addLog(`>> TRANSFER SUCCESSFUL! +${amount} ETH SECURED.`, 'found');
+            }, 2000);
+        }
+
+        function init() {
+            renderArsenal();
+            startHunting();
         }
 
         init();
